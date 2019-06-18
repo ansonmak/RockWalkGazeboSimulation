@@ -40,6 +40,7 @@ $ source ~/.bashrc
 ```bash
 $ roslaunch ur_gazebo ur10.launch limited:=true
 ```
+
 The Gazebo simulator should be launched and the UR10 robot arm should be loaded in the simulated world.
 You can rotate the view by dragging the scroll wheel.
 
