@@ -9,8 +9,13 @@ This repository is a workspace that contains `universal_robot` ROS package with 
 - ROS Kinetic
 - MoveIt!
 - Gazebo 7 (Should be included with ROS Kinetic desktop-full installation)
+- catkin_tools
 
 ### Setting up the workspace
+Clone this repository into your home directory, and rename it to `ur_ws`
+```bash
+$ git clone
+```
 
 ### Launching the simulation
 
