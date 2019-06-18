@@ -1,5 +1,6 @@
 # Rocking and Walking Manipulation with Gazebo Simulator
 This simulation is made to reproduce the experiment of Rocking and Walking Manipulation for transporting cone object. For more details about the manipulation, see [PRW-Manipulation](https://github.com/HKUST-RML/PRW-Manipulation) for manuscript and demo video.  
+  
 To watch the simulation video, see: [here](https://drive.google.com/file/d/1osyw5b-5jTaDhjVSOWYlr_D6HKPwPvq6/view)
 
 ## Usage
