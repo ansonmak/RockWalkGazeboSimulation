@@ -35,6 +35,7 @@ $ source ~/.bashrc
 ```
 
 ### Launching the simulation
+
 1. Launch the Gazebo simulator with UR10 robot arm loaded
 ```bash
 $ roslaunch ur_gazebo ur10.launch limited:=true
@@ -46,6 +47,7 @@ You can rotate the view by dragging the scroll wheel.
 ```bash
 $ roslaunch ur10_moveit_config ur10_moveit_planning_execution.launch sim:=true limited:=true
 ```
+
 3. (Optional) Launch RViz for visualizing the planning motion and setting target pose by dragging the end effector.
 ```bash
 $ roslaunch ur10_moveit_config moveit_rviz.launch config:=true
