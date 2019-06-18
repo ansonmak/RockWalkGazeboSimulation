@@ -40,7 +40,7 @@ $ source ~/.bashrc
 ```bash
 $ roslaunch ur_gazebo ur10.launch limited:=true
 ```
-
+![image](https://github.com/ansonmak/RWM-Simulation/blob/master/media/GazeboLaunch.png)
 The Gazebo simulator should be launched and the UR10 robot arm should be loaded in the simulated world.
 You can rotate the view by dragging the scroll wheel.
 
@@ -53,8 +53,14 @@ $ roslaunch ur10_moveit_config ur10_moveit_planning_execution.launch sim:=true l
 ```bash
 $ roslaunch ur10_moveit_config moveit_rviz.launch config:=true
 ```
+![image](https://github.com/ansonmak/RWM-Simulation/blob/master/media/RVizLaunch.png)
 
-##
+4. Run the ROS node to perform the manipulation
+```bash
+$ rosrun ur_control_program ur10_rocking_walking_simulation.py 
+```
+
+
 
 ## Author
 KaHei Mak (khmakac@connect.ust.hk)
