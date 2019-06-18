@@ -16,17 +16,13 @@ This repository is a workspace that contains `universal_robot` ROS package with 
 1.  Clone this repository into your home directory, and rename it to `ur_ws`
 `$  git clone https://github.com/ansonmak/RWM-Simulation.git`
 2. Enter the `ur_ws` directory and run the following command to build the workspace.
-```bash
-$ cd ws_moveit
-$ catkin init
-$ catkin clean
-$ catkin build
-```
+`$ cd ws_moveit`
+`$ catkin init`
+`$ catkin clean`
+`$ catkin build`
 
 3. Source the setup.bash to your bash session every time a new terminal is launched.
-```bash
-$ source ~/ur_ws/devel/setup.bash
-```
+`$ source ~/ur_ws/devel/setup.bash`
 or run the following command to add it in the `.bashrc` for executing it everytime when a new terminal is launched
 ```bash
 $ echo "source ~/ur_ws/devel/setup.bash" >> ~/.bashrc
