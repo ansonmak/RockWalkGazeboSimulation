@@ -24,7 +24,7 @@ $ catkin init
 $ catkin clean
 $ catkin build
 ```
-3.Source the setup.bash to your bash session every time a new terminal is launched
+3. Source the setup.bash to your bash session every time a new terminal is launched
 ```bash
 $ source ~/ur_ws/devel/setup.bash
 ```
@@ -53,6 +53,8 @@ $ roslaunch ur10_moveit_config ur10_moveit_planning_execution.launch sim:=true l
 ```bash
 $ roslaunch ur10_moveit_config moveit_rviz.launch config:=true
 ```
+
+##
 
 ## Author
 KaHei Mak (khmakac@connect.ust.hk)
