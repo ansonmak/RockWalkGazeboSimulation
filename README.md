@@ -14,9 +14,7 @@ This repository is a workspace that contains `universal_robot` ROS package with 
 
 ### Setting up the workspace
 1. Clone this repository into your home directory, and rename it to `ur_ws`
-```bash
-$ git clone https://github.com/ansonmak/RWM-Simulation.git
-```
+`$ git clone https://github.com/ansonmak/RWM-Simulation.git`
 
 2. Enter the `ur_ws` directory and run the following command to build the workspace
 ```bash
