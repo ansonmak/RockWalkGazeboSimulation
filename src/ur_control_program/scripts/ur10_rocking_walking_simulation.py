@@ -331,7 +331,7 @@ class Rocking_Walking_Manipulation:
     #   pass
     rospy.sleep(2)
     print "Start rocking..."
-    cone.is_contact_trace = True
+    cone.is_contact_trace = True #start to trace the contact point
 
     while step <= self.step and not rospy.is_shutdown():
       if abs(cone.imu.angular_velocity.z) < 0.2:
@@ -402,7 +402,7 @@ def main():
 
     #Exciting Cone motion by applying wrench
     cone.excite_cone_motion(rwm.angle_xb)
-
+    #manipulation
     rwm.manipulate_apex_position(ur10,cone)
 
     print "============Manipulation Ended"
