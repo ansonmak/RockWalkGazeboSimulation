@@ -136,7 +136,7 @@ class Ur10RoboticArm:
 
 class Oblique_cone:
   def __init__(self):
-    self.model_path = "~/.gazebo/models/oblique_cone/model.sdf"
+    self.model_path = "~/ur_ws/src/models/oblique_cone/model.sdf"
     #geometrical parameters (unit:meter)
     self.base_radius = 0.35
     self.base_height = 0.01
