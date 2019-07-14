@@ -128,7 +128,7 @@ class Ur10RoboticArm:
     position[0]  = rpy[1] = rpy[2] = 0
     position[1] = 1.2
     position[2] = 1
-    rpy[0] = -2.1  #-3.1:eef horizontal
+    rpy[0] = -2.15 #eef horizontal: -3.1
     self.follow_target_pose(position+rpy)
     print "Done"
 
@@ -274,8 +274,9 @@ class Rocking_Walking_Manipulation:
   def __init__(self):
     #manipulation parameters
     self.h_eef = 1
+    self.y_eef = 1
     self.roll_eef = -2.4
-    self.length_ab = 1.1 #meter
+    self.length_ab = 1.2 #meter
     self.angle_xb = 10 #degree
     self.step = 8
     self.displace_x = 0.03
@@ -294,9 +295,9 @@ class Rocking_Walking_Manipulation:
   def calculate_cone_pose(self, ur10, cone):
     ur10_pose = ur10.group.get_current_pose().pose
     target_pose = Pose()
-    r = math.pi - math.asin(self.h_eef/self.length_ab) - (math.pi/2 + cone.rod_roll)
+    r = math.pi - math.asin(float(self.h_eef/self.length_ab)) - (math.pi/2 + cone.rod_roll)
     q = quaternion_from_euler(r,0,0)
-    target_pose.position.y = 0.015+ur10_pose.position.y + math.sqrt(self.length_ab*self.length_ab - self.h_eef*self.h_eef) + cone.base_radius*math.cos(r)
+    target_pose.position.y = 0.01+self.y_eef + math.sqrt(self.length_ab*self.length_ab - self.h_eef*self.h_eef) + cone.base_radius*math.cos(r)
     target_pose.position.z = cone.base_radius * math.sin(r)
     target_pose.orientation.x = q[0]
     target_pose.orientation.y = q[1]
@@ -353,7 +354,6 @@ def main():
   rospy.init_node('rocking_walking_simulation', anonymous=True)
   #create ur10 object
   ur10 = Ur10RoboticArm("manipulator")
-  ur10.initialize_arm_pose()
   #create cone object
   cone = Oblique_cone()
   cone.spawn_model()
@@ -362,59 +362,102 @@ def main():
   cone.reset() #reset cone position
   cone.init_wrench_service()
   #create manipulation object
-  rwm = Rocking_Walking_Manipulation()
-
-  is_set = False
+  rwm = Rocking_Walking_Manipulation() 
 
   while not rospy.is_shutdown():
+    ur10.initialize_arm_pose()
+    position,rpy = ur10.get_cur_position_rpy()
 
-    while not is_set:
-      ur10.print_eef_state()
-      #eef pose setting
-      print "============Adjust end effector pose (Press enter for default value)"
-      position,rpy = ur10.get_cur_position_rpy()
-      position[1] = float(raw_input("EEF y position: ") or position[1])
-      rwm.h_eef = position[2] = float(raw_input("EEF height: ") or rwm.h_eef)
-      rwm.roll_eef = rpy[0] = float(raw_input("EEF roll: ") or rpy[0])
-      print_1line("Adjusting End effector...")
-      ur10.follow_target_pose(position+rpy)
-      print "Done"
-      #manipulation setting
-      rwm.print_setting()
-      print "============Manipulation Setting (Press enter for default value)"
-      rwm.length_ab = float(raw_input("Length AB (meter): ") or rwm.length_ab)
-      rwm.angle_xb = float(raw_input ("Walking Angle XB (angle): ") or rwm.angle_xb)
-      rwm.step = int(raw_input("Walking Steps: ") or rwm.step)
-      rwm.displace_x = float(raw_input("Apex displacement X: ") or rwm.displace_x)
-      rwm.displace_y = float(raw_input("Apex displacement Y: ") or rwm.displace_y)
-      cone.set_pose(rwm.calculate_cone_pose(ur10,cone))
+    #angle
+    starting_angle = 5
+    ending_angle = 65
+    angle_incre_interval = 5 #default
+    #eef y position
+    starting_eef_y = position[1]
+    ending_eef_y = 0.8
+    #eef roll (perpendicular to rod)
+    starting_eef_roll = rpy[0] #-3.1:horizontal, increase -> counter clockwise
 
-      confirm_setting = str(raw_input("Confirm? [y/n]")).lower().strip()
-      print ""
-      if confirm_setting == 'y':
-        is_set = True
-      elif confirm_setting =='n':
-        cone.reset()
-        continue
+    #plotting
+    testing_period = []
 
-    print "============Press ENTER to start"
+    #imu measure
+    imu_angular_velocity_zero_threshold = 0.2
+    imu_angular_velocity_non_zero_threshold = 0.3
+
+    print_1line ("============Enter angle increase interval (Press ENTER for default value: ")
+    print ("%d)" % angle_incre_interval)
+    angle_incre_interval = int(raw_input("Angle increase interval: ") or angle_incre_interval)
+
+    #calculate list of eef height, roll and y for each testing
+    testing_number = int((ending_angle - starting_angle)/angle_incre_interval) #number of testing-1
+    testing_angle = range(starting_angle, ending_angle, angle_incre_interval) + [ending_angle]
+    eef_y_incre_interval = float((ending_eef_y - starting_eef_y)/testing_number)
+    testing_eef_y = []
+    testing_eef_roll = []
+    testing_eef_h = []
+    for j in range(testing_number+1):
+      testing_eef_y.append(starting_eef_y + j * eef_y_incre_interval)
+      testing_eef_roll.append(starting_eef_roll + j * math.radians(angle_incre_interval))
+      testing_eef_h.append(rwm.length_ab*math.cos(math.radians(testing_angle[j])))
+
+    print "============Press ENTER to begin the period measuring"
     raw_input()
 
-    #Exciting Cone motion by applying wrench
-    cone.excite_cone_motion(rwm.angle_xb)
-    #manipulation
-    rwm.manipulate_apex_position(ur10,cone)
+    #measuring the rolling period vs angle
+    for i in range(testing_number+1): #start from 0
+      print_1line("============Current testing angle: ")
+      print (testing_angle[i])
+      #adjust eef
+      print_1line("Adjusting End effector...")
+      position[1] = rwm.y_eef = testing_eef_y[i]
+      position[2] = rwm.h_eef = testing_eef_h[i]
+      # rpy[0] = testing_eef_roll[i]
+      position[1] -= i * 0.018/10 * angle_incre_interval #correction for spawning the cone in the caging eef,  0.018 of 10 incre
+      ur10.follow_target_pose(position+rpy)
+      print "Done"
+      ur10.print_eef_state()
 
-    print "============Manipulation Ended"
-    change_setting = str(raw_input("Adjust Setting? [y/n]")).lower().strip()
-    cone.reset()
-    ur10.initialize_arm_pose()
-    ur10.follow_target_pose(rwm.init_pose)
-    print ""
-    if change_setting == 'y':
-      is_set = False
-    elif change_setting =='n':
+      #set cone pose
       cone.set_pose(rwm.calculate_cone_pose(ur10,cone))
+
+      rospy.sleep(1)
+
+      #Exciting Cone motion by applying wrench
+      cone.excite_cone_motion(rwm.angle_xb)
+
+      #measure cone rolling period
+      while abs(cone.imu.angular_velocity.z) > imu_angular_velocity_zero_threshold:
+        pass
+      start_time = rospy.get_time()
+      print_1line ("Start counting...")
+      print ("Start Time: %.2f" % start_time)
+      while abs(cone.imu.angular_velocity.z) < imu_angular_velocity_non_zero_threshold:
+        pass
+
+      while abs(cone.imu.angular_velocity.z) > imu_angular_velocity_zero_threshold:
+        pass
+      end_time = rospy.get_time()
+      print_1line ("Stop counting...")
+      print ("End Time: %.2f" % end_time)
+      while abs(cone.imu.angular_velocity.z) < imu_angular_velocity_non_zero_threshold:
+        pass
+
+      print ("Measured Period: %.2fs" % (end_time-start_time)*2)
+
+      testing_period.append((end_time-start_time)*2)
+
+      # print "enter"
+      # raw_input()
+
+      #reset cone pose
+      cone.reset()
+
+    print "============Period Measuring Ended, Close the figure window to continue"
+    plt.scatter(testing_angle,testing_period)
+    plt.xlabel("Angle alpha (degree)")
+    plt.ylabel("Period (s)")
+    plt.show()
 
 
   rospy.spin()

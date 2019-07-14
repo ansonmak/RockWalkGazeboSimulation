@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+  <!-- Here we define the 2 parameters of the macro -->
+  <xacro:macro name="tether_cone_effector" params="prefix connected_to">
+
+    <!-- <xacro:property name="virtual_link_mass" value="0.01" />
+    <xacro:property name="virtual_link_inertia" value="${0.4 * virtual_link_mass * 0.000001}" /> -->
+   
+    <!-- Create a fixed joint with a parameterized name. -->
+    <joint name="${prefix}tether_cone_effector_joint" type="fixed">
+      <!-- The parent link must be read from the robot model it is attached to. -->
+      <parent link="${connected_to}"/>
+      <child link="${prefix}tether_cone_effector"/>
+      <!-- The tool is directly attached to the flange. -->
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </joint>
+
+    <link name="${prefix}tether_cone_effector">
+      <inertial>
+        <mass value="${virtual_link_mass}" />
+        <inertia ixx="${virtual_link_inertia}" ixy="0" ixz="0" iyy="${virtual_link_inertia}" iyz="0" izz="${virtual_link_inertia}" />
+      </inertial>
+      <visual>
+        <geometry>
+          <!-- The path to the visual meshes in the package. -->
+          <mesh filename="package://ur_end_effector/meshes/tether_cone_effector/visual/tether_cone_effector.dae"/>
+        </geometry>
+      </visual>
+      <collision>
+        <geometry>
+          <!-- The path to the collision meshes in the package. -->
+          <mesh filename="package://ur_end_effector/meshes/tether_cone_effector/collision/tether_cone_effector.stl"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- TCP frame -->
+    <joint name="${prefix}tcp_joint" type="fixed">
+      <origin xyz="0 0 0.05" rpy="0 0 0"/>
+      <parent link="${prefix}tether_cone_effector"/>
+      <child link="${prefix}tcp"/>
+    </joint>
+    <link name="${prefix}tcp">
+      <inertial>
+        <mass value="${virtual_link_mass}" />
+        <inertia ixx="${virtual_link_inertia}" ixy="0" ixz="0" iyy="${virtual_link_inertia}" iyz="0" izz="${virtual_link_inertia}" />
+      </inertial>
+    </link>
+
+  </xacro:macro>
+</robot>
