@@ -1,218 +1,921 @@
 <?xml version="1.0" ?>
 
 <sdf version="1.5">
-  <model name="cart_rigid_suspension">
-    <link name="chassis">
-      <pose>0 0 0.15  0 0 0</pose>
+  <model name="cable_cone">
+    <link name='cone'>
+      <pose>0 0 0 0 0 0</pose>
       <inertial>
-        <pose>0.1 0 0  0 0 0</pose>
-        <mass>10</mass>
-        <inertia>
-          <ixx>0.21666666666666667</ixx>
-          <iyy>0.8416666666666667</iyy>
-          <izz>1.0416666666666667</izz>
-          <ixy>0</ixy>
-          <ixz>0</ixz>
-          <iyz>0</iyz>
-        </inertia>
+        <mass>0.1</mass>
       </inertial>
-      <collision name="collision">
-        <geometry>
-          <box>
-            <size>1.0 0.5 0.1</size>
-          </box>
-        </geometry>
-      </collision>
-      <visual name="visual">
-        <geometry>
-          <box>
-            <size>1.0 0.5 0.1</size>
-          </box>
-        </geometry>
-        <material>
-          <script>
-            <uri>file://media/materials/scripts/gazebo.material</uri>
-            <name>Gazebo/Grey</name>
-          </script>
-        </material>
-      </visual>
-    </link>
-    
-    <link name="wheel_front_left">
-      <pose>0.5 0.298 0.15  -1.5707963267948966 0 0</pose>
-      <inertial>
-        <mass>0.5</mass>
-        <inertia>
-          <ixx>0.0030791666666666667</ixx>
-          <iyy>0.0030791666666666667</iyy>
-          <izz>0.005625</izz>
-          <ixy>0</ixy>
-          <ixz>0</ixz>
-          <iyz>0</iyz>
-        </inertia>
-      </inertial>
-      <collision name="collision">
+
+      <collision name='base_collision'>
         <geometry>
           <cylinder>
-            <radius>0.15</radius>
-            <length>0.08</length>
+            <radius>0.35</radius>
+            <length>0.01</length>
+          </cylinder>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1</mu>
+              <mu2>1</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+
+      <visual name='base_visual'>
+        <geometry>
+          <cylinder>
+            <radius>0.35</radius>
+            <length>0.01</length>
+          </cylinder>
+        </geometry>
+      </visual>
+
+      <collision name='rod_collision'>
+        <pose>0 -0.34 0.75 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.009</radius>
+            <length>1.5</length>
           </cylinder>
         </geometry>
       </collision>
-      <visual name="visual">
+
+      <visual name='rod_visual'>
+        <pose>0 -0.34 0.75 0 0 0</pose>
         <geometry>
           <cylinder>
-            <radius>0.15</radius>
-            <length>0.08</length>
+            <radius>0.009</radius>
+            <length>1.5</length>
           </cylinder>
         </geometry>
-        <material>
-          <script>
-            <uri>file://media/materials/scripts/gazebo.material</uri>
-            <name>Gazebo/Black</name>
-          </script>
-        </material>
       </visual>
+
+      <sensor name="cone_imu" type="imu">
+        <always_on>true</always_on>
+        <update_rate>10.0</update_rate>
+        <visualize>true</visualize>
+        <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
+          <topicName>imu</topicName>
+          <bodyName>cone</bodyName>
+          <updateRateHZ>5.0</updateRateHZ>
+          <gaussianNoise>0.0</gaussianNoise>
+          <xyzOffset>0 0 0</xyzOffset>
+          <rpyOffset>0 0 0</rpyOffset>
+          <frameName>cone</frameName>
+        </plugin>
+      </sensor>
+
+      <sensor name="contact_sensor" type="contact">
+        <always_on>true</always_on>
+        <update_rate>10.0</update_rate>
+        <contact>
+          <collision>base_collision</collision>
+        </contact>
+        <plugin filename="libgazebo_ros_bumper.so" name="bumper_plugin">
+          <robotNamespace>oblique_cone</robotNamespace>
+          <updateRateHZ>10.0</updateRateHZ>
+          <bumperTopicName>bumper</bumperTopicName>
+          <frameName>world</frameName>
+        </plugin>
+      </sensor>
+
     </link>
-    <joint name="wheel_front_left_spin" type="revolute">
-      <parent>chassis</parent>
-      <child>wheel_front_left</child>
-      <axis>
-        <xyz>0 0 1</xyz>
-      </axis>
+
+    <link name="mass">
+      <pose>0 -0.35 0.5 0 0 0</pose>
+      <inertial>
+        <mass>1</mass>
+      </inertial>
+
+      <collision name='mass_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.05</radius>
+            <length>0.01</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <visual name='mass_visual'>
+        <geometry>
+          <cylinder>
+            <radius>0.05</radius>
+            <length>0.01</length>
+          </cylinder>
+        </geometry>
+      </visual>
+
+    </link>
+
+    <joint type="fixed" name="mass_joint">
+      <parent>cone</parent>
+      <child>mass</child>
     </joint>
-    
-    <link name="wheel_front_right">
-      <pose>0.5 -0.298 0.15  -1.5707963267948966 0 0</pose>
+
+    <link name="link0">
+      <pose> 0 -0.34 1.5 0 0 0</pose>
       <inertial>
-        <mass>0.5</mass>
+        <mass> 0.005 </mass>
         <inertia>
-          <ixx>0.0030791666666666667</ixx>
-          <iyy>0.0030791666666666667</iyy>
-          <izz>0.005625</izz>
-          <ixy>0</ixy>
-          <ixz>0</ixz>
-          <iyz>0</iyz>
+          <ixx>2.6541666666666674e-07</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>2.6541666666666674e-07</iyy>
+          <iyz>0.0</iyz>
+          <izz>1.0e-08</izz>
         </inertia>
       </inertial>
-      <collision name="collision">
+
+      <collision name='link0_collision'>
         <geometry>
           <cylinder>
-            <radius>0.15</radius>
-            <length>0.08</length>
+            <radius>0.002</radius>
+            <length>0.025</length>
           </cylinder>
         </geometry>
       </collision>
-      <visual name="visual">
+
+      <visual name='link0_collision'>
         <geometry>
           <cylinder>
-            <radius>0.15</radius>
-            <length>0.08</length>
+            <radius>0.002</radius>
+            <length>0.025</length>
           </cylinder>
         </geometry>
-        <material>
-          <script>
-            <uri>file://media/materials/scripts/gazebo.material</uri>
-            <name>Gazebo/Black</name>
-          </script>
-        </material>
       </visual>
     </link>
-    <joint name="wheel_front_right_spin" type="revolute">
-      <parent>chassis</parent>
-      <child>wheel_front_right</child>
-      <axis>
-        <xyz>0 0 1</xyz>
-      </axis>
+
+    <joint name="joint0" type="universal">
+      <pose>0 0 -0.0125 0 0 0</pose>
+      <parent>cone</parent>
+      <child>link0</child>
     </joint>
+
     
-    <link name="wheel_rear_left">
-      <pose>-0.5 0.298 0.15  -1.5707963267948966 0 0</pose>
+    <link name="link1">
+      <pose> 0 -0.34 1.525 0 0 0</pose>
       <inertial>
-        <mass>0.5</mass>
+        <mass> 0.005 </mass>
         <inertia>
-          <ixx>0.0030791666666666667</ixx>
-          <iyy>0.0030791666666666667</iyy>
-          <izz>0.005625</izz>
-          <ixy>0</ixy>
-          <ixz>0</ixz>
-          <iyz>0</iyz>
+          <ixx>2.6541666666666674e-07</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>2.6541666666666674e-07</iyy>
+          <iyz>0.0</iyz>
+          <izz>1.0e-08</izz>
         </inertia>
       </inertial>
-      <collision name="collision">
+
+      <collision name='link1_collision'>
         <geometry>
           <cylinder>
-            <radius>0.15</radius>
-            <length>0.08</length>
+            <radius>0.002</radius>
+            <length>0.025</length>
           </cylinder>
         </geometry>
       </collision>
-      <visual name="visual">
+
+      <visual name='link1_collision'>
         <geometry>
           <cylinder>
-            <radius>0.15</radius>
-            <length>0.08</length>
+            <radius>0.002</radius>
+            <length>0.025</length>
           </cylinder>
         </geometry>
-        <material>
-          <script>
-            <uri>file://media/materials/scripts/gazebo.material</uri>
-            <name>Gazebo/Black</name>
-          </script>
-        </material>
       </visual>
     </link>
-    <joint name="wheel_rear_left_spin" type="revolute">
-      <parent>chassis</parent>
-      <child>wheel_rear_left</child>
-      <axis>
-        <xyz>0 0 1</xyz>
-      </axis>
+
+    <joint name="joint1" type="universal">
+      <pose>0 0 -0.0125 0 0 0</pose>
+      <parent>link0</parent>
+      <child>link1</child>
     </joint>
+
     
-    <link name="wheel_rear_right">
-      <pose>-0.5 -0.298 0.15  -1.5707963267948966 0 0</pose>
+    <link name="link2">
+      <pose> 0 -0.34 1.55 0 0 0</pose>
       <inertial>
-        <mass>0.5</mass>
+        <mass> 0.005 </mass>
         <inertia>
-          <ixx>0.0030791666666666667</ixx>
-          <iyy>0.0030791666666666667</iyy>
-          <izz>0.005625</izz>
-          <ixy>0</ixy>
-          <ixz>0</ixz>
-          <iyz>0</iyz>
+          <ixx>2.6541666666666674e-07</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>2.6541666666666674e-07</iyy>
+          <iyz>0.0</iyz>
+          <izz>1.0e-08</izz>
         </inertia>
       </inertial>
-      <collision name="collision">
+
+      <collision name='link2_collision'>
         <geometry>
           <cylinder>
-            <radius>0.15</radius>
-            <length>0.08</length>
+            <radius>0.002</radius>
+            <length>0.025</length>
           </cylinder>
         </geometry>
       </collision>
-      <visual name="visual">
+
+      <visual name='link2_collision'>
         <geometry>
           <cylinder>
-            <radius>0.15</radius>
-            <length>0.08</length>
+            <radius>0.002</radius>
+            <length>0.025</length>
           </cylinder>
         </geometry>
-        <material>
-          <script>
-            <uri>file://media/materials/scripts/gazebo.material</uri>
-            <name>Gazebo/Black</name>
-          </script>
-        </material>
       </visual>
     </link>
-    <joint name="wheel_rear_right_spin" type="revolute">
-      <parent>chassis</parent>
-      <child>wheel_rear_right</child>
-      <axis>
-        <xyz>0 0 1</xyz>
-      </axis>
+
+    <joint name="joint2" type="universal">
+      <pose>0 0 -0.0125 0 0 0</pose>
+      <parent>link1</parent>
+      <child>link2</child>
     </joint>
+
     
+    <link name="link3">
+      <pose> 0 -0.34 1.575 0 0 0</pose>
+      <inertial>
+        <mass> 0.005 </mass>
+        <inertia>
+          <ixx>2.6541666666666674e-07</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>2.6541666666666674e-07</iyy>
+          <iyz>0.0</iyz>
+          <izz>1.0e-08</izz>
+        </inertia>
+      </inertial>
+
+      <collision name='link3_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <visual name='link3_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+
+    <joint name="joint3" type="universal">
+      <pose>0 0 -0.0125 0 0 0</pose>
+      <parent>link2</parent>
+      <child>link3</child>
+    </joint>
+
+    
+    <link name="link4">
+      <pose> 0 -0.34 1.6 0 0 0</pose>
+      <inertial>
+        <mass> 0.005 </mass>
+        <inertia>
+          <ixx>2.6541666666666674e-07</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>2.6541666666666674e-07</iyy>
+          <iyz>0.0</iyz>
+          <izz>1.0e-08</izz>
+        </inertia>
+      </inertial>
+
+      <collision name='link4_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <visual name='link4_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+
+    <joint name="joint4" type="universal">
+      <pose>0 0 -0.0125 0 0 0</pose>
+      <parent>link3</parent>
+      <child>link4</child>
+    </joint>
+
+    
+    <link name="link5">
+      <pose> 0 -0.34 1.625 0 0 0</pose>
+      <inertial>
+        <mass> 0.005 </mass>
+        <inertia>
+          <ixx>2.6541666666666674e-07</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>2.6541666666666674e-07</iyy>
+          <iyz>0.0</iyz>
+          <izz>1.0e-08</izz>
+        </inertia>
+      </inertial>
+
+      <collision name='link5_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <visual name='link5_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+
+    <joint name="joint5" type="universal">
+      <pose>0 0 -0.0125 0 0 0</pose>
+      <parent>link4</parent>
+      <child>link5</child>
+    </joint>
+
+    
+    <link name="link6">
+      <pose> 0 -0.34 1.65 0 0 0</pose>
+      <inertial>
+        <mass> 0.005 </mass>
+        <inertia>
+          <ixx>2.6541666666666674e-07</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>2.6541666666666674e-07</iyy>
+          <iyz>0.0</iyz>
+          <izz>1.0e-08</izz>
+        </inertia>
+      </inertial>
+
+      <collision name='link6_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <visual name='link6_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+
+    <joint name="joint6" type="universal">
+      <pose>0 0 -0.0125 0 0 0</pose>
+      <parent>link5</parent>
+      <child>link6</child>
+    </joint>
+
+    
+    <link name="link7">
+      <pose> 0 -0.34 1.675 0 0 0</pose>
+      <inertial>
+        <mass> 0.005 </mass>
+        <inertia>
+          <ixx>2.6541666666666674e-07</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>2.6541666666666674e-07</iyy>
+          <iyz>0.0</iyz>
+          <izz>1.0e-08</izz>
+        </inertia>
+      </inertial>
+
+      <collision name='link7_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <visual name='link7_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+
+    <joint name="joint7" type="universal">
+      <pose>0 0 -0.0125 0 0 0</pose>
+      <parent>link6</parent>
+      <child>link7</child>
+    </joint>
+
+    
+    <link name="link8">
+      <pose> 0 -0.34 1.7 0 0 0</pose>
+      <inertial>
+        <mass> 0.005 </mass>
+        <inertia>
+          <ixx>2.6541666666666674e-07</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>2.6541666666666674e-07</iyy>
+          <iyz>0.0</iyz>
+          <izz>1.0e-08</izz>
+        </inertia>
+      </inertial>
+
+      <collision name='link8_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <visual name='link8_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+
+    <joint name="joint8" type="universal">
+      <pose>0 0 -0.0125 0 0 0</pose>
+      <parent>link7</parent>
+      <child>link8</child>
+    </joint>
+
+    
+    <link name="link9">
+      <pose> 0 -0.34 1.725 0 0 0</pose>
+      <inertial>
+        <mass> 0.005 </mass>
+        <inertia>
+          <ixx>2.6541666666666674e-07</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>2.6541666666666674e-07</iyy>
+          <iyz>0.0</iyz>
+          <izz>1.0e-08</izz>
+        </inertia>
+      </inertial>
+
+      <collision name='link9_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <visual name='link9_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+
+    <joint name="joint9" type="universal">
+      <pose>0 0 -0.0125 0 0 0</pose>
+      <parent>link8</parent>
+      <child>link9</child>
+    </joint>
+
+    
+    <link name="link10">
+      <pose> 0 -0.34 1.75 0 0 0</pose>
+      <inertial>
+        <mass> 0.005 </mass>
+        <inertia>
+          <ixx>2.6541666666666674e-07</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>2.6541666666666674e-07</iyy>
+          <iyz>0.0</iyz>
+          <izz>1.0e-08</izz>
+        </inertia>
+      </inertial>
+
+      <collision name='link10_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <visual name='link10_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+
+    <joint name="joint10" type="universal">
+      <pose>0 0 -0.0125 0 0 0</pose>
+      <parent>link9</parent>
+      <child>link10</child>
+    </joint>
+
+    
+    <link name="link11">
+      <pose> 0 -0.34 1.775 0 0 0</pose>
+      <inertial>
+        <mass> 0.005 </mass>
+        <inertia>
+          <ixx>2.6541666666666674e-07</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>2.6541666666666674e-07</iyy>
+          <iyz>0.0</iyz>
+          <izz>1.0e-08</izz>
+        </inertia>
+      </inertial>
+
+      <collision name='link11_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <visual name='link11_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+
+    <joint name="joint11" type="universal">
+      <pose>0 0 -0.0125 0 0 0</pose>
+      <parent>link10</parent>
+      <child>link11</child>
+    </joint>
+
+    
+    <link name="link12">
+      <pose> 0 -0.34 1.8 0 0 0</pose>
+      <inertial>
+        <mass> 0.005 </mass>
+        <inertia>
+          <ixx>2.6541666666666674e-07</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>2.6541666666666674e-07</iyy>
+          <iyz>0.0</iyz>
+          <izz>1.0e-08</izz>
+        </inertia>
+      </inertial>
+
+      <collision name='link12_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <visual name='link12_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+
+    <joint name="joint12" type="universal">
+      <pose>0 0 -0.0125 0 0 0</pose>
+      <parent>link11</parent>
+      <child>link12</child>
+    </joint>
+
+    
+    <link name="link13">
+      <pose> 0 -0.34 1.825 0 0 0</pose>
+      <inertial>
+        <mass> 0.005 </mass>
+        <inertia>
+          <ixx>2.6541666666666674e-07</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>2.6541666666666674e-07</iyy>
+          <iyz>0.0</iyz>
+          <izz>1.0e-08</izz>
+        </inertia>
+      </inertial>
+
+      <collision name='link13_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <visual name='link13_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+
+    <joint name="joint13" type="universal">
+      <pose>0 0 -0.0125 0 0 0</pose>
+      <parent>link12</parent>
+      <child>link13</child>
+    </joint>
+
+    
+    <link name="link14">
+      <pose> 0 -0.34 1.85 0 0 0</pose>
+      <inertial>
+        <mass> 0.005 </mass>
+        <inertia>
+          <ixx>2.6541666666666674e-07</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>2.6541666666666674e-07</iyy>
+          <iyz>0.0</iyz>
+          <izz>1.0e-08</izz>
+        </inertia>
+      </inertial>
+
+      <collision name='link14_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <visual name='link14_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+
+    <joint name="joint14" type="universal">
+      <pose>0 0 -0.0125 0 0 0</pose>
+      <parent>link13</parent>
+      <child>link14</child>
+    </joint>
+
+    
+    <link name="link15">
+      <pose> 0 -0.34 1.875 0 0 0</pose>
+      <inertial>
+        <mass> 0.005 </mass>
+        <inertia>
+          <ixx>2.6541666666666674e-07</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>2.6541666666666674e-07</iyy>
+          <iyz>0.0</iyz>
+          <izz>1.0e-08</izz>
+        </inertia>
+      </inertial>
+
+      <collision name='link15_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <visual name='link15_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+
+    <joint name="joint15" type="universal">
+      <pose>0 0 -0.0125 0 0 0</pose>
+      <parent>link14</parent>
+      <child>link15</child>
+    </joint>
+
+    
+    <link name="link16">
+      <pose> 0 -0.34 1.9 0 0 0</pose>
+      <inertial>
+        <mass> 0.005 </mass>
+        <inertia>
+          <ixx>2.6541666666666674e-07</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>2.6541666666666674e-07</iyy>
+          <iyz>0.0</iyz>
+          <izz>1.0e-08</izz>
+        </inertia>
+      </inertial>
+
+      <collision name='link16_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <visual name='link16_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+
+    <joint name="joint16" type="universal">
+      <pose>0 0 -0.0125 0 0 0</pose>
+      <parent>link15</parent>
+      <child>link16</child>
+    </joint>
+
+    
+    <link name="link17">
+      <pose> 0 -0.34 1.925 0 0 0</pose>
+      <inertial>
+        <mass> 0.005 </mass>
+        <inertia>
+          <ixx>2.6541666666666674e-07</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>2.6541666666666674e-07</iyy>
+          <iyz>0.0</iyz>
+          <izz>1.0e-08</izz>
+        </inertia>
+      </inertial>
+
+      <collision name='link17_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <visual name='link17_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+
+    <joint name="joint17" type="universal">
+      <pose>0 0 -0.0125 0 0 0</pose>
+      <parent>link16</parent>
+      <child>link17</child>
+    </joint>
+
+    
+    <link name="link18">
+      <pose> 0 -0.34 1.95 0 0 0</pose>
+      <inertial>
+        <mass> 0.005 </mass>
+        <inertia>
+          <ixx>2.6541666666666674e-07</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>2.6541666666666674e-07</iyy>
+          <iyz>0.0</iyz>
+          <izz>1.0e-08</izz>
+        </inertia>
+      </inertial>
+
+      <collision name='link18_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <visual name='link18_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+
+    <joint name="joint18" type="universal">
+      <pose>0 0 -0.0125 0 0 0</pose>
+      <parent>link17</parent>
+      <child>link18</child>
+    </joint>
+
+    
+    <link name="link19">
+      <pose> 0 -0.34 1.975 0 0 0</pose>
+      <inertial>
+        <mass> 0.005 </mass>
+        <inertia>
+          <ixx>2.6541666666666674e-07</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>2.6541666666666674e-07</iyy>
+          <iyz>0.0</iyz>
+          <izz>1.0e-08</izz>
+        </inertia>
+      </inertial>
+
+      <collision name='link19_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <visual name='link19_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.002</radius>
+            <length>0.025</length>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+
+    <joint name="joint19" type="universal">
+      <pose>0 0 -0.0125 0 0 0</pose>
+      <parent>link18</parent>
+      <child>link19</child>
+    </joint>
+
+    
+
   </model>
 </sdf>

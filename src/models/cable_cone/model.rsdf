@@ -4,13 +4,20 @@
   # Consists of cone link to a ring formed by small cylinder element
   # SI units (length in meters)
 
-  # Geometry
+  #Geometry
   cable_length = 0.5
   cylinder_radius = 0.002
   element_qty = 20
   cylinder_length = cable_length/element_qty
-  #inertia
-  element_mass = 0.001 #in kg
+  #Inertia #Kg
+  cable_mass = 0.1
+  element_mass = cable_mass/element_qty
+  cylinder_ixx = element_mass/12 * cylinder_length * cylinder_length + element_mass/4 * cylinder_radius * cylinder_radius
+  cylinder_izz = element_mass/2 * cylinder_radius * cylinder_radius
+  #Anchor Point
+  anchor_x = 0
+  anchor_y = -0.34
+  anchor_z = 1.5
   
 
   # chassis_dx   = 1.0
@@ -44,92 +51,201 @@
   # wheel_izz    = wheel_mass/2.0 * wheel_radius**2
 %>
 <sdf version="1.5">
-
-
   <model name="cable_cone">
-    <link name="chassis">
-      <pose>0 0 <%= chassis_z0 %>  0 0 0</pose>
+    <link name='cone'>
+      <pose>0 0 0 0 0 0</pose>
       <inertial>
-        <pose><%= chassis_cgx %> <%= chassis_cgy %> <%= chassis_cgz %>  0 0 0</pose>
-        <mass><%= chassis_mass %></mass>
-        <inertia>
-          <ixx><%= chassis_ixx %></ixx>
-          <iyy><%= chassis_iyy %></iyy>
-          <izz><%= chassis_izz %></izz>
-          <ixy>0</ixy>
-          <ixz>0</ixz>
-          <iyz>0</iyz>
-        </inertia>
+        <mass>0.1</mass>
       </inertial>
-      <collision name="collision">
-        <geometry>
-          <box>
-            <size><%= chassis_dx %> <%= chassis_dy %> <%= chassis_dz %></size>
-          </box>
-        </geometry>
-      </collision>
-      <visual name="visual">
-        <geometry>
-          <box>
-            <size><%= chassis_dx %> <%= chassis_dy %> <%= chassis_dz %></size>
-          </box>
-        </geometry>
-        <material>
-          <script>
-            <uri>file://media/materials/scripts/gazebo.material</uri>
-            <name>Gazebo/Grey</name>
-          </script>
-        </material>
-      </visual>
-    </link>
-    <%
-      wheel_locations.keys.each do |k|
-        x0 = wheel_locations[k][:x0]
-        y0 = wheel_locations[k][:y0]
-    %>
-    <%= "<link name=" + '"wheel_' + k + '">' %>
-      <pose><%= x0 %> <%= y0 %> <%= wheel_radius %>  <%= -Math::PI/2 %> 0 0</pose>
-      <inertial>
-        <mass><%= wheel_mass %></mass>
-        <inertia>
-          <ixx><%= wheel_ixx %></ixx>
-          <iyy><%= wheel_iyy %></iyy>
-          <izz><%= wheel_izz %></izz>
-          <ixy>0</ixy>
-          <ixz>0</ixz>
-          <iyz>0</iyz>
-        </inertia>
-      </inertial>
-      <collision name="collision">
+
+      <collision name='base_collision'>
         <geometry>
           <cylinder>
-            <radius><%= wheel_radius %></radius>
-            <length><%= wheel_width %></length>
+            <radius>0.35</radius>
+            <length>0.01</length>
+          </cylinder>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1</mu>
+              <mu2>1</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+
+      <visual name='base_visual'>
+        <geometry>
+          <cylinder>
+            <radius>0.35</radius>
+            <length>0.01</length>
+          </cylinder>
+        </geometry>
+      </visual>
+
+      <collision name='rod_collision'>
+        <pose>0 -0.34 0.75 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.009</radius>
+            <length>1.5</length>
           </cylinder>
         </geometry>
       </collision>
-      <visual name="visual">
+
+      <visual name='rod_visual'>
+        <pose>0 -0.34 0.75 0 0 0</pose>
         <geometry>
           <cylinder>
-            <radius><%= wheel_radius %></radius>
-            <length><%= wheel_width %></length>
+            <radius>0.009</radius>
+            <length>1.5</length>
           </cylinder>
         </geometry>
-        <material>
-          <script>
-            <uri>file://media/materials/scripts/gazebo.material</uri>
-            <name>Gazebo/Black</name>
-          </script>
-        </material>
       </visual>
+
+      <sensor name="cone_imu" type="imu">
+        <always_on>true</always_on>
+        <update_rate>10.0</update_rate>
+        <visualize>true</visualize>
+        <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
+          <topicName>imu</topicName>
+          <bodyName>cone</bodyName>
+          <updateRateHZ>5.0</updateRateHZ>
+          <gaussianNoise>0.0</gaussianNoise>
+          <xyzOffset>0 0 0</xyzOffset>
+          <rpyOffset>0 0 0</rpyOffset>
+          <frameName>cone</frameName>
+        </plugin>
+      </sensor>
+
+      <sensor name="contact_sensor" type="contact">
+        <always_on>true</always_on>
+        <update_rate>10.0</update_rate>
+        <contact>
+          <collision>base_collision</collision>
+        </contact>
+        <plugin filename="libgazebo_ros_bumper.so" name="bumper_plugin">
+          <robotNamespace>oblique_cone</robotNamespace>
+          <updateRateHZ>10.0</updateRateHZ>
+          <bumperTopicName>bumper</bumperTopicName>
+          <frameName>world</frameName>
+        </plugin>
+      </sensor>
+
     </link>
-    <%= "<joint name=" + '"wheel_' + k + '_spin" type="revolute">' %>
-      <parent>chassis</parent>
-      <%= "<child>wheel_" + k + "</child>" %>
-      <axis>
-        <xyz>0 0 1</xyz>
-      </axis>
+
+    <link name="mass">
+      <pose>0 -0.35 0.5 0 0 0</pose>
+      <inertial>
+        <mass>1</mass>
+      </inertial>
+
+      <collision name='mass_collision'>
+        <geometry>
+          <cylinder>
+            <radius>0.05</radius>
+            <length>0.01</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <visual name='mass_visual'>
+        <geometry>
+          <cylinder>
+            <radius>0.05</radius>
+            <length>0.01</length>
+          </cylinder>
+        </geometry>
+      </visual>
+
+    </link>
+
+    <joint type="fixed" name="mass_joint">
+      <parent>cone</parent>
+      <child>mass</child>
     </joint>
-    <% end %>
+
+    <link name="link0">
+      <pose> <%= anchor_x %> <%= anchor_y %> <%= anchor_z %> 0 0 0</pose>
+      <inertial>
+        <mass> <%= element_mass %> </mass>
+        <inertia>
+          <ixx><%= cylinder_ixx %></ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy><%= cylinder_ixx %></iyy>
+          <iyz>0.0</iyz>
+          <izz><%= cylinder_izz %></izz>
+        </inertia>
+      </inertial>
+
+      <collision name='link0_collision'>
+        <geometry>
+          <cylinder>
+            <radius><%= cylinder_radius %></radius>
+            <length><%= cylinder_length %></length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <visual name='link0_collision'>
+        <geometry>
+          <cylinder>
+            <radius><%= cylinder_radius %></radius>
+            <length><%= cylinder_length %></length>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+
+    <joint name="joint0" type="universal">
+      <pose>0 0 -<%= cylinder_length/2%> 0 0 0</pose>
+      <parent>cone</parent>
+      <child>link0</child>
+    </joint>
+
+    <% for i in 1..element_qty-1 do %>
+    <link name="link<%= i %>">
+      <pose> <%= anchor_x %> <%= anchor_y %> <%= anchor_z+ i*cylinder_length %> 0 0 0</pose>
+      <inertial>
+        <mass> <%= element_mass %> </mass>
+        <inertia>
+          <ixx><%= cylinder_ixx %></ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy><%= cylinder_ixx %></iyy>
+          <iyz>0.0</iyz>
+          <izz><%= cylinder_izz %></izz>
+        </inertia>
+      </inertial>
+
+      <collision name='link<%= i %>_collision'>
+        <geometry>
+          <cylinder>
+            <radius><%= cylinder_radius %></radius>
+            <length><%= cylinder_length %></length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <visual name='link<%= i %>_collision'>
+        <geometry>
+          <cylinder>
+            <radius><%= cylinder_radius %></radius>
+            <length><%= cylinder_length %></length>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+
+    <joint name="joint<%= i %>" type="universal">
+      <pose>0 0 <%=-cylinder_length/2 %> 0 0 0</pose>
+      <parent>link<%= i-1 %></parent>
+      <child>link<%= i %></child>
+    </joint>
+
+    <%end%>
+
   </model>
 </sdf>

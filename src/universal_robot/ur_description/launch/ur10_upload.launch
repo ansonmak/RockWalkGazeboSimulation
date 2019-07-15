@@ -3,5 +3,5 @@
   <arg name="limited" default="false" doc="If true, limits joint range [-PI, PI] on all joints." />
   
   <param unless="$(arg limited)" name="robot_description" command="$(find xacro)/xacro --inorder '$(find ur_description)/urdf/ur10_robot.urdf.xacro'" />
-  <param if="$(arg limited)" name="robot_description" command="$(find xacro)/xacro --inorder '$(find ur_end_effector)/urdf/caging_end_effector/ur10_caging_end_effector.xacro'" />
+  <param if="$(arg limited)" name="robot_description" command="$(find xacro)/xacro --inorder '$(find ur_end_effector)/urdf/tether_cone_effector/ur10_tether_cone_effector.xacro'" />
 </launch>
