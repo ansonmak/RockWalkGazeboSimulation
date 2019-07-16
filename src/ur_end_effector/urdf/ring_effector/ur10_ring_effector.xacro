@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="ur10_ring_effector">
+
+  <!-- common stuff -->
+  <xacro:include filename="$(find ur_description)/urdf/common.gazebo.xacro" />
+
+  <!-- ur10 -->
+  <xacro:include filename="$(find ur_description)/urdf/ur10.urdf.xacro" />
+
+  <!-- end-effector -->
+  <xacro:include filename="ring_effector.xacro" />
+
+  <!-- ur10 -->
+  <!-- The ur10 xacro must be included with passing parameters -->
+  <xacro:ur10_robot prefix="" joint_limited="true"
+		 shoulder_pan_lower_limit="${-pi}" shoulder_pan_upper_limit="${pi}"
+		 shoulder_lift_lower_limit="${-pi}" shoulder_lift_upper_limit="${pi}"
+		 elbow_joint_lower_limit="${-pi}" elbow_joint_upper_limit="${pi}"
+		 wrist_1_lower_limit="${-pi}" wrist_1_upper_limit="${pi}"
+		 wrist_2_lower_limit="${-pi}" wrist_2_upper_limit="${pi}"
+		 wrist_3_lower_limit="${-pi}" wrist_3_upper_limit="${pi}"
+  />
+
+  <!-- end-effector -->
+  <!-- Here we include the end-effector by setting the parameters -->
+  <!-- TODO: check end-effector link name of robot -->
+  <xacro:ring_effector prefix="" connected_to="tool0"/>
+
+
+  <!-- define the ur10's position and orientation in the world coordinate system -->
+  <link name="world" />
+
+  <joint name="world_joint" type="fixed">
+    <parent link="world" />
+    <child link="base_link" /> <!-- TODO: check base_link name of robot -->
+    <origin xyz="0.0 0.0 0.7" rpy="0.0 0.0 0.0" />
+  </joint>
+
+</robot>

@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+  <!-- Here we define the 2 parameters of the macro -->
+  <xacro:macro name="ring_effector" params="prefix connected_to">
+   
+    <!-- Create a fixed joint with a parameterized name. -->
+    <joint name="${prefix}ring_effector_joint" type="fixed">
+      <!-- The parent link must be read from the robot model it is attached to. -->
+      <parent link="${connected_to}"/>
+      <child link="${prefix}ring_effector"/>
+      <!-- The tool is directly attached to the flange. -->
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </joint>
+
+    <link name="${prefix}ring_effector">
+      <visual>
+        <geometry>
+          <!-- The path to the visual meshes in the package. -->
+          <mesh filename="package://ur_end_effector/meshes/ring_effector/visual/ring_effector.dae"/>
+        </geometry>
+      </visual>
+      <collision>
+        <geometry>
+          <!-- The path to the collision meshes in the package. -->
+          <mesh filename="package://ur_end_effector/meshes/ring_effector/collision/ring_effector.stl"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- TCP frame -->
+    <joint name="${prefix}tcp_joint" type="fixed">
+      <origin xyz="0 0 0.05" rpy="0 0 0"/>
+      <parent link="${prefix}ring_effector"/>
+      <child link="${prefix}tcp"/>
+    </joint>
+    <link name="${prefix}tcp"/>
+
+  </xacro:macro>
+</robot>
