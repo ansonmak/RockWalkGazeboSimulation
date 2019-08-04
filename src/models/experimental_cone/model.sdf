@@ -1,0 +1,36 @@
+<?xml version='1.0'?>
+<sdf version='1.5'>
+  <model name="experimental_cone">
+
+    <link name="cone">
+      <inertial>
+        <mass>1.04</mass>
+        <inertia>
+          <ixx>0.21</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>0.2</iyy>
+          <iyz>-0.05</iyz>
+          <izz>0.09</izz>
+        </inertia>
+      </inertial>
+
+      <collision name="cone_collision">
+        <geometry>
+          <mesh>
+            <uri>model://experimental_cone/meshes/experimental_cone.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="cone_visual">
+        <geometry>
+          <mesh>
+            <uri>model://experimental_cone/meshes/experimental_cone.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+
+    </link>
+  </model>
+</sdf>

@@ -24,156 +24,18 @@
   cable_joint_friction = 0.0
   #Anchor Point
   anchor_x = 0
-  anchor_y = -0.34
+  anchor_y = -0.3525
   anchor_z = 1.4
-  
 
-  # chassis_dx   = 1.0
-  # chassis_dy   = 0.5
-  # chassis_dz   = 0.1
-  # wheel_radius = 0.15
-  # wheel_width  = 0.08
-  # chassis_z0   = wheel_radius
-  # wheel_x0     = chassis_dx*0.5
-  # wheel_y0     = chassis_dy*0.5 + wheel_width*0.6
-
-  # wheel_locations = {
-  #   "front_left"  => {:x0 => wheel_x0, :y0 => wheel_y0 },
-  #   "front_right" => {:x0 => wheel_x0, :y0 => -wheel_y0 },
-  #   "rear_left"   => {:x0 => -wheel_x0, :y0 => wheel_y0 },
-  #   "rear_right"  => {:x0 => -wheel_x0, :y0 => -wheel_y0 },
-  # }
-
-  # # inertia
-  # chassis_mass = 10
-  # chassis_ixx  = chassis_mass/12.0 * (chassis_dy**2 + chassis_dz**2)
-  # chassis_iyy  = chassis_mass/12.0 * (chassis_dz**2 + chassis_dx**2)
-  # chassis_izz  = chassis_mass/12.0 * (chassis_dx**2 + chassis_dy**2)
-  # # chassis c.g. offset from center of box
-  # chassis_cgx  = chassis_dx*0.1
-  # chassis_cgy  = 0 
-  # chassis_cgz  = 0 
-  # wheel_mass   = 0.5
-  # wheel_ixx    = wheel_mass * (wheel_radius**2 / 4.0 + wheel_width**2 / 12.0)
-  # wheel_iyy    = wheel_mass * (wheel_radius**2 / 4.0 + wheel_width**2 / 12.0)
-  # wheel_izz    = wheel_mass/2.0 * wheel_radius**2
 %>
 <sdf version="1.5">
   <model name="cable_cone">
     <!-- <self_collide>true</self_collide> -->
-    <link name='cone'>
-      <pose>0 0 0 0 0 0</pose>
-      <inertial>
-        <mass>0.1</mass>
-      </inertial>
 
-      <collision name='base_collision'>
-        <geometry>
-          <cylinder>
-            <radius>0.35</radius>
-            <length>0.01</length>
-          </cylinder>
-        </geometry>
-        <surface>
-          <friction>
-            <ode>
-              <mu>1</mu>
-              <mu2>1</mu2>
-            </ode>
-          </friction>
-        </surface>
-      </collision>
-
-      <visual name='base_visual'>
-        <geometry>
-          <cylinder>
-            <radius>0.35</radius>
-            <length>0.01</length>
-          </cylinder>
-        </geometry>
-      </visual>
-
-      <collision name='rod_collision'>
-        <pose>0 -0.34 0.75 0 0 0</pose>
-        <geometry>
-          <cylinder>
-            <radius>0.009</radius>
-            <length>1.5</length>
-          </cylinder>
-        </geometry>
-      </collision>
-
-      <visual name='rod_visual'>
-        <pose>0 -0.34 0.75 0 0 0</pose>
-        <geometry>
-          <cylinder>
-            <radius>0.009</radius>
-            <length>1.5</length>
-          </cylinder>
-        </geometry>
-      </visual>
-
-      <sensor name="cone_imu" type="imu">
-        <always_on>true</always_on>
-        <update_rate>10.0</update_rate>
-        <visualize>true</visualize>
-        <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
-          <topicName>imu</topicName>
-          <bodyName>cone</bodyName>
-          <updateRateHZ>5.0</updateRateHZ>
-          <gaussianNoise>0.0</gaussianNoise>
-          <xyzOffset>0 0 0</xyzOffset>
-          <rpyOffset>0 0 0</rpyOffset>
-          <frameName>cone</frameName>
-        </plugin>
-      </sensor>
-
-      <sensor name="contact_sensor" type="contact">
-        <always_on>true</always_on>
-        <update_rate>10.0</update_rate>
-        <contact>
-          <collision>base_collision</collision>
-        </contact>
-        <plugin filename="libgazebo_ros_bumper.so" name="bumper_plugin">
-          <robotNamespace>cable_cone</robotNamespace>
-          <updateRateHZ>10.0</updateRateHZ>
-          <bumperTopicName>bumper</bumperTopicName>
-          <frameName>world</frameName>
-        </plugin>
-      </sensor>
-
-    </link>
-
-    <link name="mass">
-      <pose>0 -0.35 0.5 0 0 0</pose>
-      <inertial>
-        <mass>1</mass>
-      </inertial>
-
-      <collision name='mass_collision'>
-        <geometry>
-          <cylinder>
-            <radius>0.05</radius>
-            <length>0.01</length>
-          </cylinder>
-        </geometry>
-      </collision>
-
-      <visual name='mass_visual'>
-        <geometry>
-          <cylinder>
-            <radius>0.05</radius>
-            <length>0.01</length>
-          </cylinder>
-        </geometry>
-      </visual>
-
-    </link>
-
-    <joint type="fixed" name="mass_joint">
-      <parent>cone</parent>
-      <child>mass</child>
-    </joint>
+    <include>
+      <uri>model://experimental_cone</uri>
+      <pose> 0 0 0 0 0 0 </pose>
+    </include>
 
     <link name="link0">
       <pose> <%= anchor_x %> <%= anchor_y - cylinder_length/2%> <%= anchor_z %> <%=  pi/2 %> 0 0</pose>
@@ -216,7 +78,7 @@
 
     <joint name="joint0" type="universal">
       <pose>0 0 <%= -cylinder_length/2%> 0 0 0</pose>
-      <parent>cone</parent>
+      <parent>experimental_cone::cone</parent>
       <child>link0</child>
     </joint>
 
@@ -300,7 +162,7 @@
     </link>
 
     <joint name="ring_joint" type="universal">
-      <pose>0 <%=ring_radius%> 0 0 0 0</pose>
+      <pose>0 <%=ring_radius%> 0 0 0 0 </pose>
       <parent>link<%= element_qty-1%></parent>
       <child>ring</child>
     </joint>

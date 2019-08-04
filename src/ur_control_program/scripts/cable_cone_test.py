@@ -126,8 +126,8 @@ class Ur10RoboticArm:
     #align x, pitch and yaw to zero
     position, rpy = self.get_cur_position_rpy()
     position[0] = 0
-    position[1] = 0.84
-    position[2] = 1.4
+    position[1] = 0.8275
+    position[2] = 1.3
     rpy[1] += math.pi/2
     self.follow_target_pose(position+rpy)
     print "Done"
@@ -136,7 +136,7 @@ class Ur10RoboticArm:
 
 class Oblique_cone:
   def __init__(self):
-    self.model_path = "~/ur_ws/src/models/cable_cone/model.sdf"
+    self.model_path = "~/ur_ws/src/models/cable_cone/model_v2.sdf"
     #geometrical parameters (unit:meter)
     self.base_radius = 0.35
     self.base_height = 0.01
