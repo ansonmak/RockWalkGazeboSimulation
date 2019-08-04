@@ -27,7 +27,9 @@ This repository is a workspace that contains `universal_robot` ROS package with 
 `$ source ~/ur_ws/devel/setup.bash`  
 or run the following command to add it in the `.bashrc` for executing it everytime when a new terminal is launched.  
 `$ echo "source ~/ur_ws/devel/setup.bash" >> ~/.bashrc`
-`$ source ~/.bashrc`
+`$ source ~/.bashrc`  
+
+4. Copy `Models` folder in the src directory to your GAZEBO_MODEL_PATH
 
 ### Running the simulation
 1. Launch the Gazebo simulator with UR10 robot arm loaded.  
