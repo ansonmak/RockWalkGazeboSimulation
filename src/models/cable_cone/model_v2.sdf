@@ -502,7 +502,7 @@
     </link>
 
     <joint name="ring_joint" type="universal">
-      <pose>0 0.02 0 0 0 0</pose>
+      <pose>0 0.02 0 0 0 0 </pose>
       <parent>link9</parent>
       <child>ring</child>
     </joint>

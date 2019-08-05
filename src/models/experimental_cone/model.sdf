@@ -31,6 +31,35 @@
         </geometry>
       </visual>
 
+      <sensor name="cone_imu" type="imu">
+        <always_on>true</always_on>
+        <update_rate>10.0</update_rate>
+        <visualize>true</visualize>
+        <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
+          <topicName>imu</topicName>
+          <bodyName>cone</bodyName>
+          <updateRateHZ>5.0</updateRateHZ>
+          <gaussianNoise>0.0</gaussianNoise>
+          <xyzOffset>0 0 0</xyzOffset>
+          <rpyOffset>0 0 0</rpyOffset>
+          <frameName>cone</frameName>
+        </plugin>
+      </sensor>
+
+      <sensor name="contact_sensor" type="contact">
+        <always_on>true</always_on>
+        <update_rate>10.0</update_rate>
+        <contact>
+          <collision>cone_collision</collision>
+        </contact>
+        <plugin filename="libgazebo_ros_bumper.so" name="bumper_plugin">
+          <!-- <robotNamespace>experimental_cone</robotNamespace> -->
+          <updateRateHZ>10.0</updateRateHZ>
+          <bumperTopicName>cone_bumper</bumperTopicName>
+          <frameName>world</frameName>
+        </plugin>
+      </sensor>
+
     </link>
   </model>
 </sdf>
